@@ -9,13 +9,15 @@ public class Crc {
     private  static ArrayList<Integer> message_received = new ArrayList<>();
     private  static ArrayList<Integer> pnumber = new ArrayList<>();
     private  static ArrayList<Integer> crc = new ArrayList<>() ;
-
+    private  static int messages_with_error =0;
+    private static int messages_with_error_detected_by_crc =0;
+    private static int messages_with_error_not_detected_by_crc =0;
 
 
    private void message_generator(int k){
 
-            message_send.add(1);
-            for(int i=1;i<k;i++){
+
+            for(int i=0;i<k;i++){
                 double prob = Math.random()*100;
                 if(prob>=50){
                         message_send.add(1);
@@ -24,8 +26,8 @@ public class Crc {
                     message_send.add(0);
                 }
             }
-       System.out.print("Message is :");
-       System.out.println(message_send);
+
+
     }
 
 
@@ -100,12 +102,11 @@ public class Crc {
                     message_index++;
                 }
             }
-           System.out.print("CRC IS:");
-           System.out.println(crc);
 
-            if( message_index==message.size()){
-                break;
-            }
+           if(message_index==message.size()){
+               break;
+           }
+
             create_message_part(index_start);
             found1=false;
             size=0;
@@ -119,9 +120,9 @@ public class Crc {
 
     private void create_message_part(int index ){
         int[] message_part = new int[pnumber.size()];
-        int j=0;
 
-        for(;j<pnumber.size() ;index++,j++){
+
+        for( int j=0;j<pnumber.size() ;index++,j++){
             message_part[j]=crc.get(index);
         }
 
@@ -135,23 +136,20 @@ public class Crc {
        boolean found_error_crc=false;
             for (int i=0;i<initial_message.size();i++){
                 if(!initial_message.get(i).equals(message_received.get(i))){
-                    System.out.println("There is an error");
+                    messages_with_error++;
                     found_error=true;
                     break;
                 }
             }
             for(int i:crc) {
                 if (i == 1) {
-                    System.out.println("Error detected by crc");
+                    messages_with_error_detected_by_crc++;
                     found_error_crc=true;
                     break;
                 }
             }
-            if(!found_error){
-                System.out.println("No error!");
-            }
             if(found_error && !found_error_crc){
-                System.out.println("Crc didnt find the error");
+                messages_with_error_not_detected_by_crc++;
             }
 
 
@@ -163,7 +161,6 @@ public class Crc {
        ArrayList<Integer> temp = new ArrayList<>();
         double prob;
         int index = crc.size();
-        System.out.println("");
         for(int j=pnumber.size()-1;j>0;j--,index-- ){
             temp.add(crc.get(index-1));
         }
@@ -175,7 +172,6 @@ public class Crc {
 
         crc.clear();
 
-        System.out.println(initial_message);
 
         for(int i : initial_message){
             prob = Math.random(); // generates  float number between 0-1
@@ -192,10 +188,6 @@ public class Crc {
                 }
 
         }
-        System.out.println(message_received);
-
-
-
 
     }
 
@@ -211,11 +203,7 @@ public class Crc {
         pnumber.add(0);
         pnumber.add(1);
         Crc obj1 = new Crc();
-        obj1.message_generator(10);
-        obj1.division(message_send, false);
-        obj1.send_message();
-        obj1.division(message_received, true);
-      /*  for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 100000; i++) {
             obj1.message_generator(10);
             obj1.division(message_send, false);
             obj1.send_message();
@@ -223,7 +211,12 @@ public class Crc {
             initial_message.clear();
             message_send.clear();
             message_received.clear();
+            crc.clear();
 
-    }*/
+    }
+        System.out.println("Messages with error :" + messages_with_error);
+        System.out.println("Messages with error detected :" + messages_with_error_detected_by_crc);
+        System.out.println("Messages with error not detected :" + messages_with_error_not_detected_by_crc);
+
     }
 }
